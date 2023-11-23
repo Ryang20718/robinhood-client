@@ -1,4 +1,4 @@
-module gitlab.com/brokerage-api/robinhood-client
+module github.com/Ryang20718/robinhood-client
 
 require (
 	github.com/AlekSi/pointer v1.2.0 // indirect
