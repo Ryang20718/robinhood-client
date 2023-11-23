@@ -1,7 +1,7 @@
 package robinhood
 
 import (
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetAccounts returns all the accounts associated with a login/client.

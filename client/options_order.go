@@ -9,7 +9,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/google/uuid"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // OptionsOrderOpts encapsulates common Options order choices

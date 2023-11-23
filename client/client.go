@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 	"golang.org/x/oauth2"
 )
 

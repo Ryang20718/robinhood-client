@@ -3,7 +3,7 @@ package robinhood
 import (
 	"strings"
 
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetFundamentals returns fundemental data for the list of stocks provided.

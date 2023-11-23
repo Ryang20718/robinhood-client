@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 const dateFormat = "2006-01-02"

@@ -5,7 +5,7 @@ import (
 
 	"testing"
 
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 func TestCryptoOrder(t *testing.T) {

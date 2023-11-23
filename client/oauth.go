@@ -10,7 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
-	// model "gitlab.com/brokerage-api/robinhood-client/models"
+	// model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // DefaultClientID is used by the website.

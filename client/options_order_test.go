@@ -10,7 +10,7 @@ import (
 
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetOptionsOrders returns all outstanding options orders

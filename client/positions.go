@@ -4,7 +4,7 @@ import (
 	"net/url"
 
 	"github.com/AlekSi/pointer"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetPositions returns all the positions associated with an account.

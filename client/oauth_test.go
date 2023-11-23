@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	// model "gitlab.com/brokerage-api/robinhood-openapi/openapi"
+	// model "github.com/Ryang20718/robinhood-openapi/openapi"
 	"github.com/stretchr/testify/assert"
 )
 

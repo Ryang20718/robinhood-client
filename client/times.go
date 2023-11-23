@@ -2,7 +2,7 @@ package robinhood
 
 import (
 	"time"
-	// model "gitlab.com/brokerage-api/robinhood-client/models"
+	// model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // Common constants for hours and minutes from midnight at which market events

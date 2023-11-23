@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/AlekSi/pointer"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetWatchlists retrieves the watchlists for a given set of credentials/accounts.

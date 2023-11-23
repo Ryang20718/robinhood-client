@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/AlekSi/pointer"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // CryptoOrderOpts encapsulates differences between order types

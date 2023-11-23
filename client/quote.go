@@ -2,7 +2,7 @@ package robinhood
 
 import (
 	"strings"
-	model "gitlab.com/brokerage-api/robinhood-client/models"
+	model "github.com/Ryang20718/robinhood-client/models"
 )
 
 // GetQuote returns all the latest stock quotes for the list of stocks provided
