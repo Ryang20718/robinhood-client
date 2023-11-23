@@ -27,7 +27,7 @@ const (
 	PARTIALLY_FILLED OrderState = "partially_filled"
 	FILLED OrderState = "filled"
 	REJECTED OrderState = "rejected"
-	CANCELED OrderState = "canceled"
+	CANCELED OrderState = "cancelled"
 	FAILED OrderState = "failed"
 )
 
@@ -39,7 +39,7 @@ var AllowedOrderStateEnumValues = []OrderState{
 	"partially_filled",
 	"filled",
 	"rejected",
-	"canceled",
+	"cancelled",
 	"failed",
 }
 

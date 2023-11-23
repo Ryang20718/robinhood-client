@@ -21,6 +21,8 @@ type OpenCloseStrategy string
 
 // List of OpenCloseStrategy
 const (
+	SHORT_PUT OpenCloseStrategy = "short_put"
+	SHORT_CALL OpenCloseStrategy = "short_call"
 	LONG_CALL OpenCloseStrategy = "long_call"
 	LONG_PUT OpenCloseStrategy = "long_put"
 	LONG_CALL_SPREAD OpenCloseStrategy = "long_call_spread"
@@ -33,6 +35,8 @@ const (
 
 // All allowed values of OpenCloseStrategy enum
 var AllowedOpenCloseStrategyEnumValues = []OpenCloseStrategy{
+	"short_put",
+	"short_call",
 	"long_call",
 	"long_put",
 	"long_call_spread",
