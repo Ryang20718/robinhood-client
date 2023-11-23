@@ -78,27 +78,4 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, er
 
 	rs = append(rs, results.Results...)
 	return &rs, nil
-	// fmt.Println("DEBUG", results.Next)
-	// if results.Next == nil {
-	// 	fmt.Println("next nil")
-	// }
-	// if results.Previous == nil {
-	// 	fmt.Println("prev nil")
-	// }
-	// pager := Pager{Next: *results.Next, Previous: ""}
-	// for pager.HasMore() {
-	// 	err := pager.GetNext(c, &results)
-	// 	if err != nil {
-	// 		return &rs, err
-	// 	}
-	// 	rs = append(rs, results.Results...)
-	// 	fmt.Println("HERE", pager.Next)
-	// 	// select {
-	// 	// case <-ctx.Done():
-	// 	// 	return &rs, nil
-	// 	// default:
-	// 	// }
-	// }
-
-	return &rs, nil
 }
