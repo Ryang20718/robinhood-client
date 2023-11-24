@@ -30,7 +30,7 @@ type OptionOrder struct {
 	Premium *string `json:"premium,omitempty"`
 	ProcessedPremium *string `json:"processed_premium,omitempty"`
 	Price *string `json:"price,omitempty"`
-	ProcessedQuantity *string `json:"processed_quantity,omitempty"`
+	ProcessedQuantity *string `json:"processed_quantity,omitempty"`  // units of 1, 2, 3
 	Quantity *string `json:"quantity,omitempty"`
 	RefId *string `json:"ref_id,omitempty"`
 	State *OrderState `json:"state,omitempty"`
@@ -44,6 +44,11 @@ type OptionOrder struct {
 	OpeningStrategy *OpenCloseStrategy `json:"opening_strategy,omitempty"`
 	ClosingStrategy *OpenCloseStrategy `json:"closing_strategy,omitempty"`
 	StopPrice *string `json:"stop_price,omitempty"`
+	// manually added
+	ExpirationDate *string  `json:"expiration_date,omitempty"`
+	StrikePrice    *string `json:"strike_price,omitempty"`
+	Expired        *string    `json:"expired,omitempty"`
+	Assigned       *string    `json:"assigned,omitempty"`
 }
 
 // NewOptionOrder instantiates a new OptionOrder object

@@ -26,7 +26,7 @@ func (c *Client) GetInstrumentForSymbol(sym string) (*model.InstrumentData, erro
 		return nil, err
 	}
 	if len(i.Results) < 1 {
-		return nil, fmt.Errorf("no results")
+		return nil, fmt.Errorf("failing to GetInstrumentForSymbol for" + sym)
 	}
 	return &i.Results[0], err
 }

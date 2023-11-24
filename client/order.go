@@ -149,26 +149,48 @@ func (c *Client) RecentOrders() ([]model.Order, error) {
 	return o.Results, nil
 }
 
-type GetEventsResponse struct {
-	Next     *string        `json:"next,omitempty"`
-	Previous *string        `json:"previous,omitempty"`
-	Results  *[]interface{} `json:"results,omitempty"`
-}
-
 // RecentOrders returns any events
 /*
-Returns the events related to a stock that the user owns. For example, if you owned options for USO and that stock \
-    underwent a stock split resulting in you owning shares of newly created USO1, then that event will be returned
+Returns the events related to a options all events shown here will be assigned
 */
-func (c *Client) GetEvents(sym string) (*[]interface{}, error) {
+func (c *Client) GetEvents(sym string) (*[]model.OptionAssignment, error) {
+	var rs []model.OptionAssignment
+	var results model.GetEventsResponse
+	instrument, err := c.GetInstrumentForSymbol(sym)
+	if err != nil {
+		// some symbols may be nil
+		return nil, nil
+	}
+	url := EPEvents + "?equity_instrument_id=" + *instrument.Id
+	for {
+		err := c.GetAndDecode(url, &results)
+		if err != nil {
+			return nil, err
+		}
+
+		rs = append(rs, *results.Results...)
+		if results.Next == nil {
+			break
+		}
+
+		url = *results.Next
+	}
+	return &rs, nil
+}
+
+/*
+Returns the stock splits (THIS DOESN'T WORK)
+*/
+func (c *Client) GetStockSplits(sym string) (*[]interface{}, error) {
 	var rs []interface{}
-	var results GetEventsResponse
+	var results model.GetStockSplitResponse //model.GetEventsResponse
 	instrument, err := c.GetInstrumentForSymbol(sym)
 	if err != nil {
 		return nil, err
 	}
-	url := EPEvents + "?equity_instrument_id=" + *instrument.Id
+	url := EPInstruments + *instrument.Id + "/splits/"
 	for {
+		fmt.Println(url)
 		err := c.GetAndDecode(url, &results)
 		if err != nil {
 			return nil, err

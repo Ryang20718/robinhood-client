@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/AlekSi/pointer"
 	model "github.com/Ryang20718/robinhood-client/models"
@@ -67,25 +68,27 @@ func (c *Client) OrderOptions(q *model.OptionInstrument, o OptionsOrderOpts) (js
 
 // GetOptionsOrders returns all outstanding options orders
 func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, error) {
-	var results model.GetOptionOrdersResponse
-	var rs []model.OptionOrder
-
+	rs := []model.OptionOrder{}
+	cache := make(map[string]*[]model.OptionAssignment)
 	url := EPOptions + "orders/"
 	for {
+		var results model.GetOptionOrdersResponse
 		err := c.GetAndDecode(url, &results)
 		if err != nil {
 			return nil, err
 		}
-
 		rs = append(rs, results.Results...)
 		if results.Next == nil {
 			break
 		}
-
 		url = *results.Next
 	}
 
-	for _, order := range rs {
+	for idx, order := range rs {
+		rs[idx].Assigned = new(string)
+		rs[idx].Expired = new(string)
+		rs[idx].StrikePrice = new(string)
+		rs[idx].ExpirationDate = new(string)
 		if *order.State != "filled" {
 			continue
 		}
@@ -95,13 +98,35 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, er
 			if err != nil {
 				return nil, err
 			}
-			recentEvents, err := c.GetEvents(*order.ChainSymbol)
-			if err != nil {
-				fmt.Println("UH OH", instrument)
-				return nil, err
+			t, _ := time.Parse("2006-01-02", *instrument.ExpirationDate)
+
+			optionExpiryDate := t.Unix()
+			today := time.Now().Unix()
+
+			*rs[idx].StrikePrice = *instrument.StrikePrice
+			*rs[idx].ExpirationDate = *instrument.ExpirationDate
+			// cache recent events API CALL based on ticker --> events
+			// *instrument.State --> expired or cancelled
+			recentEvents, exists := cache[*order.ChainSymbol]
+			if !exists {
+				recentEvents, err = c.GetEvents(*order.ChainSymbol)
+				if err != nil {
+					return nil, err
+				}
+				cache[*order.ChainSymbol] = recentEvents
 			}
-			fmt.Println("GG", *recentEvents)
-			//fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
+
+			if recentEvents != nil {
+				for _, optionAssignment := range *recentEvents {
+					strikePrice := *optionAssignment.EquityComponents[0].Price
+					if *instrument.StrikePrice == strikePrice && *optionAssignment.EventDate == *instrument.ExpirationDate {
+						*rs[idx].Assigned = "true"
+					}
+				}
+			}
+			if optionExpiryDate <= today && *rs[idx].Assigned != "true" {
+				*rs[idx].Expired = "true"
+			}
 		}
 	}
 
