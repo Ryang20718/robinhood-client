@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/AlekSi/pointer"
-	"github.com/google/uuid"
 	model "github.com/Ryang20718/robinhood-client/models"
+	"github.com/google/uuid"
 )
 
 // OptionsOrderOpts encapsulates common Options order choices
@@ -67,15 +67,37 @@ func (c *Client) OrderOptions(q *model.OptionInstrument, o OptionsOrderOpts) (js
 
 // GetOptionsOrders returns all outstanding options orders
 func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, error) {
-	rs := make([]model.OptionOrder, 0)
-
 	var results model.GetOptionOrdersResponse
+	var rs []model.OptionOrder
 
-	err := c.GetAndDecode(EPOptions+"orders/", &results)
-	if err != nil {
-		return nil, err
+	url := EPOptions + "orders/"
+	for {
+		err := c.GetAndDecode(url, &results)
+		if err != nil {
+			return nil, err
+		}
+
+		rs = append(rs, results.Results...)
+		if results.Next == nil {
+			break
+		}
+
+		url = *results.Next
 	}
 
-	rs = append(rs, results.Results...)
+	for _, order := range rs {
+		if *order.State != "filled" {
+			continue
+		}
+
+		for _, leg := range order.Legs {
+			instrument, err := c.GetHistoricalOptionsInstrument(ctx, *leg.Option)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.IssueDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
+		}
+	}
+
 	return &rs, nil
 }

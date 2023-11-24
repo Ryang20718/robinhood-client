@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	model "github.com/Ryang20718/robinhood-client/models"
+	"github.com/hashicorp/go-multierror"
 )
 
 const dateFormat = "2006-01-02"
@@ -82,6 +82,17 @@ func (c *Client) GetOptionChains(ctx context.Context, is ...*model.InstrumentDat
 
 }
 
+// Get Historical Data regarding an options trade
+func (c *Client) GetHistoricalOptionsInstrument(ctx context.Context, url string) (*model.OptionInstrument, error) {
+	var results model.OptionInstrument
+
+	err := c.GetAndDecode(url, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return &results, nil
+}
 
 // GetOptionsInstrument returns a list of option-typed instruments given a list of
 // expiration dates for a given trade type. The request will continue until the
