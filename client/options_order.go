@@ -95,7 +95,13 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, er
 			if err != nil {
 				return nil, err
 			}
-			fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.IssueDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
+			recentEvents, err := c.GetEvents(*order.ChainSymbol)
+			if err != nil {
+				fmt.Println("UH OH", instrument)
+				return nil, err
+			}
+			fmt.Println("GG", *recentEvents)
+			//fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
 		}
 	}
 

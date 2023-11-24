@@ -33,6 +33,7 @@ const (
 	EPOptionOrders        = EPBase + "options/positions/"
 	EPOrders              = EPBase + "orders/"
 	EPOptions             = EPBase + "options/"
+	EPEvents              = EPBase + "options/events/"
 	EPMarket              = EPBase + "marketdata/"
 	EPOptionQuote         = EPMarket + "options/"
 )

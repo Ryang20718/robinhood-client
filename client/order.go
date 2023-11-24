@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/AlekSi/pointer"
-	"github.com/pkg/errors"
 	model "github.com/Ryang20718/robinhood-client/models"
+	"github.com/pkg/errors"
 )
 
 // OrderSide is which side of the trade an order is on
@@ -147,4 +147,39 @@ func (c *Client) RecentOrders() ([]model.Order, error) {
 	}
 
 	return o.Results, nil
+}
+
+type GetEventsResponse struct {
+	Next     *string        `json:"next,omitempty"`
+	Previous *string        `json:"previous,omitempty"`
+	Results  *[]interface{} `json:"results,omitempty"`
+}
+
+// RecentOrders returns any events
+/*
+Returns the events related to a stock that the user owns. For example, if you owned options for USO and that stock \
+    underwent a stock split resulting in you owning shares of newly created USO1, then that event will be returned
+*/
+func (c *Client) GetEvents(sym string) (*[]interface{}, error) {
+	var rs []interface{}
+	var results GetEventsResponse
+	instrument, err := c.GetInstrumentForSymbol(sym)
+	if err != nil {
+		return nil, err
+	}
+	url := EPEvents + "?equity_instrument_id=" + *instrument.Id
+	for {
+		err := c.GetAndDecode(url, &results)
+		if err != nil {
+			return nil, err
+		}
+
+		rs = append(rs, *results.Results...)
+		if results.Next == nil {
+			break
+		}
+
+		url = *results.Next
+	}
+	return &rs, nil
 }
