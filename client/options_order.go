@@ -150,7 +150,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 				status = "Expired"
 			}
 			qty, _ := strconv.ParseFloat(*order.ProcessedQuantity, 64)
-			strikePrice, _ := strconv.ParseFloat(*order.StrikePrice, 64)
+			strikePrice, _ := strconv.ParseFloat(*instrument.StrikePrice, 64)
 			unitCost, _ := strconv.ParseFloat(*order.Price, 64)
 			optionTransaction := model.OptionTransaction{
 				Ticker:          *order.ChainSymbol,

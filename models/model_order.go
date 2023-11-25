@@ -28,7 +28,7 @@ type Order struct {
 	ClientId *string `json:"client_id,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	CumulativeQuantity *string `json:"cumulative_quantity,omitempty"`
-	DollarBasedAmount *string `json:"dollar_based_amount,omitempty"`
+	// DollarBasedAmount *string `json:"dollar_based_amount,omitempty"`
 	Executions []Execution `json:"executions,omitempty"`
 	TotalNotional *OrderTotalNotional `json:"total_notional,omitempty"`
 	ExecutedNotional *OrderTotalNotional `json:"executed_notional,omitempty"`
@@ -312,37 +312,37 @@ func (o *Order) SetCumulativeQuantity(v string) {
 	o.CumulativeQuantity = &v
 }
 
-// GetDollarBasedAmount returns the DollarBasedAmount field value if set, zero value otherwise.
-func (o *Order) GetDollarBasedAmount() string {
-	if o == nil || IsNil(o.DollarBasedAmount) {
-		var ret string
-		return ret
-	}
-	return *o.DollarBasedAmount
-}
+// // GetDollarBasedAmount returns the DollarBasedAmount field value if set, zero value otherwise.
+// func (o *Order) GetDollarBasedAmount() string {
+// 	if o == nil || IsNil(o.DollarBasedAmount) {
+// 		var ret string
+// 		return ret
+// 	}
+// 	return *o.DollarBasedAmount
+// }
 
-// GetDollarBasedAmountOk returns a tuple with the DollarBasedAmount field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Order) GetDollarBasedAmountOk() (*string, bool) {
-	if o == nil || IsNil(o.DollarBasedAmount) {
-		return nil, false
-	}
-	return o.DollarBasedAmount, true
-}
+// // GetDollarBasedAmountOk returns a tuple with the DollarBasedAmount field value if set, nil otherwise
+// // and a boolean to check if the value has been set.
+// func (o *Order) GetDollarBasedAmountOk() (*string, bool) {
+// 	if o == nil || IsNil(o.DollarBasedAmount) {
+// 		return nil, false
+// 	}
+// 	return o.DollarBasedAmount, true
+// }
 
-// HasDollarBasedAmount returns a boolean if a field has been set.
-func (o *Order) HasDollarBasedAmount() bool {
-	if o != nil && !IsNil(o.DollarBasedAmount) {
-		return true
-	}
+// // HasDollarBasedAmount returns a boolean if a field has been set.
+// func (o *Order) HasDollarBasedAmount() bool {
+// 	if o != nil && !IsNil(o.DollarBasedAmount) {
+// 		return true
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
-// SetDollarBasedAmount gets a reference to the given string and assigns it to the DollarBasedAmount field.
-func (o *Order) SetDollarBasedAmount(v string) {
-	o.DollarBasedAmount = &v
-}
+// // SetDollarBasedAmount gets a reference to the given string and assigns it to the DollarBasedAmount field.
+// func (o *Order) SetDollarBasedAmount(v string) {
+// 	o.DollarBasedAmount = &v
+// }
 
 // GetExecutions returns the Executions field value if set, zero value otherwise.
 func (o *Order) GetExecutions() []Execution {
@@ -1271,9 +1271,9 @@ func (o Order) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CumulativeQuantity) {
 		toSerialize["cumulative_quantity"] = o.CumulativeQuantity
 	}
-	if !IsNil(o.DollarBasedAmount) {
-		toSerialize["dollar_based_amount"] = o.DollarBasedAmount
-	}
+	// if !IsNil(o.DollarBasedAmount) {
+	// 	toSerialize["dollar_based_amount"] = o.DollarBasedAmount
+	// }
 	if !IsNil(o.Executions) {
 		toSerialize["executions"] = o.Executions
 	}

@@ -2,7 +2,6 @@ package robinhood
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -90,55 +89,56 @@ func (c *Client) CancelOrder(o *model.Order) error {
 	return nil
 }
 
+// type PaginatedOrder2 struct {
+// 	Count    *string       `json:"count,omitempty"`
+// 	Next     *string       `json:"next,omitempty"`
+// 	Previous *string       `json:"previous,omitempty"`
+// 	Results  []interface{} `json:"results,omitempty"`
+// }
+
 // GetStockOrders returns orders made by this client.
 func (c *Client) GetStockOrders() ([]model.Transaction, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), defaultRequestTimeout)
 	rs := make([]model.Order, 0)
-	defer cancel()
 
 	transactionList := []model.Transaction{}
-	var results model.PaginatedOrder
 	// err := c.GetAndDecode(EPBase+"/orders?page_size=200", &results)
-	err := c.GetAndDecode(EPOrders, &results)
-	if err != nil {
-		return nil, err
-	}
 
-	rs = append(rs, results.Results...)
-	pager := Pager{Next: *results.Next, Previous: *results.Previous}
-	for pager.HasMore() {
-		err := pager.GetNext(c, &results)
+	url := EPOrders
+	for {
+		var results model.PaginatedOrder
+		err := c.GetAndDecode(url, &results)
 		if err != nil {
-			return rs, err
+			return nil, err
 		}
 		rs = append(rs, results.Results...)
-
-		select {
-		case <-ctx.Done():
-			return rs, nil
-		default:
-		}
-	}
-
-	for _, order := range rs { // TODO: optimize
-		instrumentData, err := c.GetInstrument(pointer.GetString(order.Instrument))
-		if err != nil {
+		if results.Next == nil {
 			break
 		}
-		order.Symbol = instrumentData.Symbol
+		url = *results.Next
 	}
+
 	for _, order := range rs {
-		unitCost, _ := strconv.ParseFloat(*order.Price, 64)
-		qty, _ := strconv.ParseFloat(*order.Quantity, 64)
-		transaction := model.Transaction{
-			Ticker:          *order.Symbol,
-			TransactionType: fmt.Sprintf("%s", *order.Side), // Buy. Sell
-			Qty:             qty,
-			UnitCost:        unitCost,
-			CreatedAt:       (*order.CreatedAt).Format("2006-01-02 15:04:05"),
-			Tag:             fmt.Sprintf("%s", *order.Side),
+		instrumentData, err := c.GetInstrument(*order.Instrument)
+		if err != nil {
+			fmt.Println("ERR", "No data", err.Error())
+			return transactionList, nil
 		}
-		transactionList := append(transactionList, transaction)
+		order.Symbol = instrumentData.Symbol
+		if (*order.State == "cancelled" && len(order.Executions) > 0) || *order.State == "filled" {
+			fmt.Println("-1", order.Price, "0", *order.State, "1", order.AveragePrice, "2", *order.Quantity, "3", *instrumentData.Symbol, "4", *order.CreatedAt, "5", *order.Side)
+			unitCost, _ := strconv.ParseFloat(*order.AveragePrice, 64)
+			qty, _ := strconv.ParseFloat(*order.Quantity, 64)
+			transaction := model.Transaction{
+				Ticker:          *instrumentData.Symbol,
+				TransactionType: fmt.Sprintf("%s", *order.Side), // Buy. Sell
+				Qty:             qty,
+				UnitCost:        unitCost,
+				CreatedAt:       (*order.CreatedAt).Format("2006-01-02 15:04:05"),
+				Tag:             fmt.Sprintf("%s", *order.Side),
+			}
+			transactionList = append(transactionList, transaction)
+		}
+
 	}
 
 	return transactionList, nil
