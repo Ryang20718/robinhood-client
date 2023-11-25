@@ -116,19 +116,23 @@ func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 		}
 		url = *results.Next
 	}
-
+	cache := make(map[string]string)
 	for _, order := range rs {
-		instrumentData, err := c.GetInstrument(*order.Instrument)
-		if err != nil {
-			fmt.Println("ERR", "No data", err.Error())
-			return transactionList, nil
+		orderSymbol, keyExists := cache[*order.Instrument]
+		if !keyExists {
+			instrumentData, err := c.GetInstrument(*order.Instrument)
+			if err != nil {
+				return transactionList, nil
+			}
+			order.Symbol = instrumentData.Symbol
+			cache[*order.Instrument] = *instrumentData.Symbol
 		}
-		order.Symbol = instrumentData.Symbol
+
 		if (*order.State == "cancelled" && len(order.Executions) > 0) || *order.State == "filled" {
 			unitCost, _ := strconv.ParseFloat(*order.AveragePrice, 64)
 			qty, _ := strconv.ParseFloat(*order.Quantity, 64)
 			transaction := model.Transaction{
-				Ticker:          *instrumentData.Symbol,
+				Ticker:          orderSymbol,
 				TransactionType: fmt.Sprintf("%s", *order.Side), // Buy. Sell
 				Qty:             qty,
 				UnitCost:        unitCost,
