@@ -125,7 +125,6 @@ func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 		}
 		order.Symbol = instrumentData.Symbol
 		if (*order.State == "cancelled" && len(order.Executions) > 0) || *order.State == "filled" {
-			fmt.Println("-1", order.Price, "0", *order.State, "1", order.AveragePrice, "2", *order.Quantity, "3", *instrumentData.Symbol, "4", *order.CreatedAt, "5", *order.Side)
 			unitCost, _ := strconv.ParseFloat(*order.AveragePrice, 64)
 			qty, _ := strconv.ParseFloat(*order.Quantity, 64)
 			transaction := model.Transaction{
@@ -138,9 +137,7 @@ func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 			}
 			transactionList = append(transactionList, transaction)
 		}
-
 	}
-
 	return transactionList, nil
 }
 
