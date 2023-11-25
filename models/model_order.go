@@ -58,6 +58,18 @@ type Order struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	Url *string `json:"url,omitempty"`
 }
+// STart of manually added
+
+type Transaction struct {
+	Ticker          string
+	TransactionType string // Buy. Sell
+	Qty             float64
+	UnitCost        float64
+	CreatedAt       string
+	Tag             string
+}
+
+// END
 
 // NewOrder instantiates a new Order object
 // This constructor will assign default values to properties that have it defined,

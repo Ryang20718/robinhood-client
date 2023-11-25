@@ -49,7 +49,22 @@ type OptionOrder struct {
 	StrikePrice    *string `json:"strike_price,omitempty"`
 	Expired        *string    `json:"expired,omitempty"`
 	Assigned       *string    `json:"assigned,omitempty"`
+	TransactionCode *string `json:"transaction_code,omitempty"` // STO, BTC, BTO, STC
 }
+
+// Manually Added
+type OptionTransaction struct {
+	Ticker          string
+	TransactionType string
+	Qty             float64
+	StrikePrice     float64
+	UnitCost        float64
+	CreatedAt       string
+	ExpirationDate  string
+	Status          string // Assigned or Expired or Open
+	Tag             string
+}
+// End
 
 // NewOptionOrder instantiates a new OptionOrder object
 // This constructor will assign default values to properties that have it defined,

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/AlekSi/pointer"
 	model "github.com/Ryang20718/robinhood-client/models"
@@ -90,11 +91,12 @@ func (c *Client) CancelOrder(o *model.Order) error {
 }
 
 // GetStockOrders returns orders made by this client.
-func (c *Client) GetStockOrders() ([]model.Order, error) {
+func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultRequestTimeout)
 	rs := make([]model.Order, 0)
 	defer cancel()
 
+	transactionList := []model.Transaction{}
 	var results model.PaginatedOrder
 	// err := c.GetAndDecode(EPBase+"/orders?page_size=200", &results)
 	err := c.GetAndDecode(EPOrders, &results)
@@ -125,8 +127,21 @@ func (c *Client) GetStockOrders() ([]model.Order, error) {
 		}
 		order.Symbol = instrumentData.Symbol
 	}
+	for _, order := range rs {
+		unitCost, _ := strconv.ParseFloat(*order.Price, 64)
+		qty, _ := strconv.ParseFloat(*order.Quantity, 64)
+		transaction := model.Transaction{
+			Ticker:          *order.Symbol,
+			TransactionType: fmt.Sprintf("%s", *order.Side), // Buy. Sell
+			Qty:             qty,
+			UnitCost:        unitCost,
+			CreatedAt:       (*order.CreatedAt).Format("2006-01-02 15:04:05"),
+			Tag:             fmt.Sprintf("%s", *order.Side),
+		}
+		transactionList := append(transactionList, transaction)
+	}
 
-	return rs, nil
+	return transactionList, nil
 }
 
 // RecentOrders returns any recent orders made by this client.

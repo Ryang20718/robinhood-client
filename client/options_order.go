@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/AlekSi/pointer"
@@ -67,7 +68,8 @@ func (c *Client) OrderOptions(q *model.OptionInstrument, o OptionsOrderOpts) (js
 }
 
 // GetOptionsOrders returns all outstanding options orders
-func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, error) {
+func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransaction, error) {
+	optionTransactionList := []model.OptionTransaction{}
 	rs := []model.OptionOrder{}
 	cache := make(map[string]*[]model.OptionAssignment)
 	url := EPOptions + "orders/"
@@ -89,6 +91,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, er
 		rs[idx].Expired = new(string)
 		rs[idx].StrikePrice = new(string)
 		rs[idx].ExpirationDate = new(string)
+		rs[idx].TransactionCode = new(string)
 		if *order.State != "filled" {
 			continue
 		}
@@ -127,8 +130,44 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionOrder, er
 			if optionExpiryDate <= today && *rs[idx].Assigned != "true" {
 				*rs[idx].Expired = "true"
 			}
+			transCode := ""
+			if *leg.Side == "buy" {
+				transCode += "B"
+			} else {
+				transCode += "S"
+			}
+			if *instrument.Tradability == "tradable" {
+				transCode += "TO"
+			} else { // untradeable
+				transCode += "TC"
+			}
+			*rs[idx].TransactionCode = transCode
+
+			status := "Open"
+			if *rs[idx].Assigned != "" {
+				status = "Assigned"
+			} else if *rs[idx].Expired != "" {
+				status = "Expired"
+			}
+			qty, _ := strconv.ParseFloat(*order.ProcessedQuantity, 64)
+			strikePrice, _ := strconv.ParseFloat(*order.StrikePrice, 64)
+			unitCost, _ := strconv.ParseFloat(*order.Price, 64)
+			optionTransaction := model.OptionTransaction{
+				Ticker:          *order.ChainSymbol,
+				TransactionType: transCode,
+				Qty:             qty,
+				StrikePrice:     strikePrice,
+				UnitCost:        unitCost,
+				CreatedAt:       *order.CreatedAt,
+				ExpirationDate:  *instrument.ExpirationDate,
+				Status:          status,
+				Tag:             fmt.Sprintf("%s %s", *leg.Side, *instrument.Type),
+			}
+			optionTransactionList = append(optionTransactionList, optionTransaction)
+			// fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
+			// 2023-11-17T16:27:34.081091Z 2023-12-01 tradable active 0.70000000 1.00000 TSLA 280.0000 call buy
 		}
 	}
 
-	return &rs, nil
+	return &optionTransactionList, nil
 }
