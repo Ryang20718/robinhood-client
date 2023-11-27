@@ -118,7 +118,7 @@ func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 	}
 	cache := make(map[string]string)
 	for _, order := range rs {
-		orderSymbol, keyExists := cache[*order.Instrument]
+		_, keyExists := cache[*order.Instrument]
 		if !keyExists {
 			instrumentData, err := c.GetInstrument(*order.Instrument)
 			if err != nil {
@@ -132,7 +132,7 @@ func (c *Client) GetStockOrders() ([]model.Transaction, error) {
 			unitCost, _ := strconv.ParseFloat(*order.AveragePrice, 64)
 			qty, _ := strconv.ParseFloat(*order.Quantity, 64)
 			transaction := model.Transaction{
-				Ticker:          orderSymbol,
+				Ticker:          cache[*order.Instrument],
 				TransactionType: fmt.Sprintf("%s", *order.Side), // Buy. Sell
 				Qty:             qty,
 				UnitCost:        unitCost,
