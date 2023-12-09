@@ -136,9 +136,9 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 			} else {
 				transCode += "S"
 			}
-			if *instrument.Tradability == "tradable" {
+			if *leg.PositionEffect == "open" {
 				transCode += "TO"
-			} else { // untradeable
+			} else {
 				transCode += "TC"
 			}
 			*rs[idx].TransactionCode = transCode
