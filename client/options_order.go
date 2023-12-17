@@ -105,7 +105,6 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 
 			optionExpiryDate := t.Unix()
 			today := time.Now().Unix()
-
 			*rs[idx].StrikePrice = *instrument.StrikePrice
 			*rs[idx].ExpirationDate = *instrument.ExpirationDate
 			// cache recent events API CALL based on ticker --> events
@@ -151,7 +150,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 			}
 			qty, _ := strconv.ParseFloat(*order.ProcessedQuantity, 64)
 			strikePrice, _ := strconv.ParseFloat(*instrument.StrikePrice, 64)
-			unitCost, _ := strconv.ParseFloat(*order.Price, 64)
+			unitCost, _ := strconv.ParseFloat(*leg.Executions[0].Price, 64)
 			optionTransaction := model.OptionTransaction{
 				Ticker:          *order.ChainSymbol,
 				TransactionType: transCode,
@@ -164,10 +163,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 				Tag:             fmt.Sprintf("%s %s", *leg.Side, *instrument.Type),
 			}
 			optionTransactionList = append(optionTransactionList, optionTransaction)
-			// fmt.Println("GG", *order.CreatedAt, *instrument.ExpirationDate, *instrument.Tradability, *instrument.State, *order.Price, *order.ProcessedQuantity, *order.ChainSymbol, *instrument.StrikePrice, *instrument.Type, *leg.Side)
-			// 2023-11-17T16:27:34.081091Z 2023-12-01 tradable active 0.70000000 1.00000 TSLA 280.0000 call buy
 		}
 	}
-
 	return &optionTransactionList, nil
 }
