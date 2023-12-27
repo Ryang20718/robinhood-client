@@ -173,7 +173,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 				if !exists {
 					coverOptionList[key] = 0
 				}
-				coverOptionList[key] += int(optionTransaction.Qty) // keep track of all options that are closing
+				coverOptionList[key] += int(optionTransaction.Qty) // keep track of all options that are closing options prev opened
 			}
 		}
 	}
@@ -192,7 +192,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 			_, match := coverOptionList[key]
 			if match && coverOptionList[key] > 0 {
 				remainingQty -= float64(coverOptionList[key])
-				if remainingQty > 0.0 {
+				if remainingQty > 0.0 { // if negative will be margin, TODO Ryang handle this
 					closedOption := optionTransactionList[i]
 					closedOption.Qty = remainingQty + optionTransactionList[i].Qty
 					closedOption.Status = "Expired"
