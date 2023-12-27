@@ -86,6 +86,8 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 		url = *results.Next
 	}
 
+	coverOptionList := make(map[string]int) // keep track of all options that are closing
+	// key is ticker-price-expirationdate-transcode
 	for idx, order := range rs {
 		rs[idx].Assigned = new(string)
 		rs[idx].Expired = new(string)
@@ -129,6 +131,7 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 			if optionExpiryDate <= today && *rs[idx].Assigned != "true" {
 				*rs[idx].Expired = "true"
 			}
+			status := "Open"
 			transCode := ""
 			if *leg.Side == "buy" {
 				transCode += "B"
@@ -138,19 +141,20 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 			if *leg.PositionEffect == "open" {
 				transCode += "TO"
 			} else {
+				status = "Expired"
 				transCode += "TC"
 			}
+			qty, _ := strconv.ParseFloat(*order.ProcessedQuantity, 64)
+			strikePrice, _ := strconv.ParseFloat(*instrument.StrikePrice, 64)
+			unitCost, _ := strconv.ParseFloat(*leg.Executions[0].Price, 64)
+
 			*rs[idx].TransactionCode = transCode
 
-			status := "Open"
 			if *rs[idx].Assigned != "" {
 				status = "Assigned"
 			} else if *rs[idx].Expired != "" {
 				status = "Expired"
 			}
-			qty, _ := strconv.ParseFloat(*order.ProcessedQuantity, 64)
-			strikePrice, _ := strconv.ParseFloat(*instrument.StrikePrice, 64)
-			unitCost, _ := strconv.ParseFloat(*leg.Executions[0].Price, 64)
 			optionTransaction := model.OptionTransaction{
 				Ticker:          *order.ChainSymbol,
 				TransactionType: transCode,
@@ -163,6 +167,42 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (*[]model.OptionTransacti
 				Tag:             fmt.Sprintf("%s %s", *leg.Side, *instrument.Type),
 			}
 			optionTransactionList = append(optionTransactionList, optionTransaction)
+			if transCode == "STC" || transCode == "BTC" {
+				key := fmt.Sprintf("%s-%s-%s-%s", *order.ChainSymbol, *instrument.StrikePrice, *instrument.ExpirationDate, transCode)
+				_, exists := coverOptionList[key]
+				if !exists {
+					coverOptionList[key] = 0
+				}
+				coverOptionList[key] += int(optionTransaction.Qty) // keep track of all options that are closing
+			}
+		}
+	}
+
+	for i, optionHistory := range optionTransactionList {
+		if optionHistory.TransactionType == "STO" || optionHistory.TransactionType == "BTO" {
+			coverTransCode := ""
+			if optionHistory.TransactionType == "STO" {
+				coverTransCode = "BTC"
+			} else if optionHistory.TransactionType == "BTO" {
+				coverTransCode = "STC"
+			}
+			key := fmt.Sprintf("%s-%.4f-%s-%s", optionHistory.Ticker, optionHistory.StrikePrice, optionHistory.ExpirationDate, coverTransCode)
+			// Closing position, so we need to pop from stack
+			remainingQty := optionHistory.Qty
+			_, match := coverOptionList[key]
+			if match && coverOptionList[key] > 0 {
+				remainingQty -= float64(coverOptionList[key])
+				if remainingQty > 0.0 {
+					closedOption := optionTransactionList[i]
+					closedOption.Qty = remainingQty + optionTransactionList[i].Qty
+					closedOption.Status = "Expired"
+					optionTransactionList[i].Qty = (remainingQty * -1)
+					optionTransactionList = append(optionTransactionList, closedOption)
+				} else {
+					optionTransactionList[i].Status = "Expired"
+				}
+			}
+
 		}
 	}
 	return &optionTransactionList, nil
